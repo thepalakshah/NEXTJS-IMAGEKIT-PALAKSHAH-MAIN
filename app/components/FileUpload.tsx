@@ -1,16 +1,10 @@
 "use client"; // This component must be a client component
 
-import {
-  ImageKitAbortError,
-  ImageKitInvalidRequestError,
-  ImageKitServerError,
-  ImageKitUploadNetworkError,
-  upload,
-} from "@imagekit/next";
-import { useRef, useState } from "react";
+import { upload, UploadResponse } from "@imagekit/next";
+import { useState } from "react";
 
 interface FileUploadProps {
-  onSuccess: (res: any) => void;
+  onSuccess: (res: UploadResponse) => void;
   onProgress?: (progress: number) => void;
   fileType?: "image" | "video";
 }
@@ -53,18 +47,18 @@ const FileUpload = ({ onSuccess, onProgress, fileType }: FileUploadProps) => {
         expire: auth.expire,
         token: auth.token,
         onProgress: (event) => {
-          if(event.lengthComputable && onProgress){
+          if (event.lengthComputable && onProgress) {
             const percent = (event.loaded / event.total) * 100;
             onProgress(Math.round(percent))
           }
         },
-        
+
       });
       onSuccess(res)
     } catch (error) {
-        console.error("Upload failed", error)
+      console.error("Upload failed", error)
     } finally {
-        setUploading(false)
+      setUploading(false)
     }
   };
 
@@ -74,10 +68,17 @@ const FileUpload = ({ onSuccess, onProgress, fileType }: FileUploadProps) => {
         type="file"
         accept={fileType === "video" ? "video/*" : "image/*"}
         onChange={handleFileChange}
+        title={fileType === "video" ? "Upload a video file" : "Upload an image file"}
+        placeholder={fileType === "video" ? "Choose a video file" : "Choose an image file"}
       />
       {uploading && <span>Loading....</span>}
+
+      {/* Display error message here */}
+      {error && <span className="file-upload-error">{error}</span>}
+
     </>
   );
 };
+
 
 export default FileUpload;
